@@ -22,23 +22,24 @@
 #' @return A ggplot2 object providing a map of the US West Coast. The map is
 #' returned visibly to provide easy printing capabilities.
 #'
-plot_westcoast <- function(g,
-  xlim = c(-127.15, -116.50),
-  ylim = c(31.90, 49.50)) {
-
-  world <- rnaturalearth::ne_countries(scale = "medium", returnclass = "sf")
-  if (missing(g)) {
-    g <- ggplot2::ggplot(data = world)
-  }
-
-  # Include the outline of the US West Coast and remove axes labels
-  gg <- g +
-    ggplot2::geom_sf(data = world) +
-    ggplot2::coord_sf(xlim = xlim,
-      ylim = ylim, expand = FALSE) +
-    ggplot2::theme_bw() +
-    ggplot2::labs(x = "", y = "")
-
-  # Return it visibly so users don't have use print()
-  return(gg)
+plot_westcoast <- function (g, xlim = c(-127.15, -116.5), ylim = c(31.9, 49.5)) 
+{
+    if (.Platform$OS.type == "windows") {
+        world <- rnaturalearth::ne_countries(scale = "medium", returnclass = "sf")
+    }
+    else {
+        load(paste0(find.package("VASTWestCoast"), "/data/world_hires.RData"))
+        # Avoid warning: st_crs<- : replacing crs does not reproject data; use st_transform for that 
+        oldOpt <- options(warn = -1)
+        sf::st_crs(world) = 4326
+        options(oldOpt)
+    }
+    if (missing(g)) {
+        g <- ggplot2::ggplot(data = world)
+    }
+    gg <- g + ggplot2::geom_sf(data = world) + ggplot2::coord_sf(xlim = xlim, 
+        ylim = ylim, expand = FALSE) + ggplot2::theme_bw() + 
+        ggplot2::labs(x = "", y = "")
+    return(gg)
 }
+
